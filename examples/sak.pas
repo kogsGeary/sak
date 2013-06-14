@@ -1530,6 +1530,8 @@ end;
 procedure TSAK_Init.CheckCount(Sender: TObject);
 begin
   timercount.Enabled := False;
+  if (isWorking = True then
+  begin
   if fpgapplication.ComponentCount <> CompCount then
   begin
     SAKUnLoadLib;
@@ -1538,7 +1540,7 @@ begin
   end;
   timercount.Enabled := True;
 end;
-
+end;
  {$endif}
 
  function TSAK_Init.LoadLib: integer;
@@ -1623,9 +1625,13 @@ var
 begin
    if assigned(InitSpeech) then
   begin
+    InitSpeech.TimerCount.Enabled:=false;
+     InitSpeech.TimerRepeat.Enabled:=false;
   SAKUnLoadLib;
   sleep(100);
-   for i := 0 to high(InitSpeech.AssistiveData) do
+   InitSpeech.TimerCount.Free;
+   InitSpeech.TimerRepeat.Free;
+     for i := 0 to high(InitSpeech.AssistiveData) do
       InitSpeech.AssistiveData[i].Free;
     InitSpeech.Free;
    sleep(100);
