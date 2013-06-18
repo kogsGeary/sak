@@ -1074,8 +1074,7 @@ begin
   SetLength(InitSpeech.AssistiveData, 0);
 
          {$IF DEFINED(LCL)}
-
-  for f := 0 to application.ComponentCount - 1 do  ///
+     for f := 0 to application.ComponentCount - 1 do  ///
   begin
     SetLength(InitSpeech.AssistiveData, Length(InitSpeech.AssistiveData) + 1);
     InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1] :=
@@ -1345,6 +1344,22 @@ begin
 
     {$else}// fpGUI
 
+     SetLength(InitSpeech.AssistiveData, Length(InitSpeech.AssistiveData) + 1);
+    InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1] :=
+      TSAK_Assistive.Create();
+
+    InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].Description :=
+      'Application';
+
+    InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].TheObject :=
+      Tfpgapplication(fpgapplication);
+
+   InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].OriOnKeyPress :=
+    Tfpgapplication(fpgapplication).OnKeyPress;
+
+  Tfpgapplication(fpgapplication).OnKeyPress := @InitSpeech.SAKKeyPress;
+
+
   for f := 0 to fpgapplication.formCount - 1 do  /// fpgui
   begin
     SetLength(InitSpeech.AssistiveData, Length(InitSpeech.AssistiveData) + 1);
@@ -1530,7 +1545,7 @@ end;
 procedure TSAK_Init.CheckCount(Sender: TObject);
 begin
   timercount.Enabled := False;
-  if (isWorking = True then
+  if (isWorking = True) then
   begin
   if fpgapplication.ComponentCount <> CompCount then
   begin
@@ -1656,10 +1671,9 @@ begin
   begin
     InitSpeech.TimerCount.Enabled := False;
     {$IF DEFINED(LCL)}
-    // InitSpeech.TimerCount.Free;
-    for i := 0 to high(InitSpeech.AssistiveData) do
+       for i := 0 to high(InitSpeech.AssistiveData) do
     begin
-      if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
+       if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
         (InitSpeech.AssistiveData[i].TheObject is TForm) then
       begin
         TForm(InitSpeech.AssistiveData[i].TheObject).OnKeyPress :=
@@ -1776,6 +1790,13 @@ begin
 
     for i := 0 to high(InitSpeech.AssistiveData) do
     begin
+        if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
+        (InitSpeech.AssistiveData[i].TheObject is Tfpgapplication) then
+      begin
+        Tfpgapplication(InitSpeech.AssistiveData[i].TheObject).OnKeyPress :=
+          InitSpeech.AssistiveData[i].OriOnKeyPress;
+        end
+      else
       if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
         (InitSpeech.AssistiveData[i].TheObject is TfpgForm) then
       begin

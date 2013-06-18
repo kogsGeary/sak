@@ -1,7 +1,7 @@
 
 unit uos_portaudio;
 
-{This is the Dynamic loading version of PortAudio.pas from the HuMuS team.
+{This is the Dynamic loading version of PortAudio Portable Real-Time Audio Library
  You can choose the folder and file of the PortAudio library with Pa_load() and
  release it with Pa_unload().
 
@@ -15,7 +15,7 @@ unit uos_portaudio;
 
   by Max Karpushin, homeplaner@yandex.ru
 }
-{
+{  
   PortAudio bindings for FPC by the HuMuS team.
   Latest version available at: http://sourceforge.net/apps/trac/humus/
 
