@@ -2,18 +2,16 @@ unit Unit1;
 
 {$mode objfpc}{$H+}
 
-
- {$DEFINE fpGUI}
 interface
 
 uses
-  sak, Unit2, Unit3, Forms, StdCtrls, Grids, Dialogs, SysUtils, Classes;
+  sak, Unit2, Unit3, Forms, StdCtrls, Grids, Dialogs, Menus, SysUtils, Classes;
 
 type
 
-  { TForm1 }
+  { TMainForm }
 
-  TForm1 = class(TForm)
+  TMainForm = class(TForm)
     Button1: TButton;
     Button2: TButton;
     Button3: TButton;
@@ -26,6 +24,13 @@ type
     Edit1: TEdit;
     Label1: TLabel;
     Label2: TLabel;
+    MainMenu1: TMainMenu;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    MenuItem3: TMenuItem;
+    MenuItem4: TMenuItem;
+    MenuItem5: TMenuItem;
+    MenuItem6: TMenuItem;
     OpenDialog1: TOpenDialog;
     SaveDialog1: TSaveDialog;
     size_: TListBox;
@@ -44,6 +49,7 @@ type
     procedure Button7Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure MenuItem1Click(Sender: TObject);
 
   private
     { private declarations }
@@ -53,7 +59,7 @@ type
   end;
 
 var
-  Form1: TForm1;
+  MainForm: TMainForm;
   tempi: integer;
 
 
@@ -61,10 +67,10 @@ implementation
 
 {$R *.lfm}
 
-{ TForm1 }
+{ TMainForm }
 
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TMainForm.Button2Click(Sender: TObject);
 begin
   SAKLoadLib;
   button2.Enabled := False;
@@ -79,14 +85,14 @@ begin
 
 end;
 
-procedure TForm1.Button3Click(Sender: TObject);
+procedure TMainForm.Button3Click(Sender: TObject);
 begin
   SAKUnloadLib;
   button2.Enabled := True;
   button3.Enabled := False;
 end;
 
-procedure TForm1.Button4Click(Sender: TObject);
+procedure TMainForm.Button4Click(Sender: TObject);
 begin
   form2.Show;
 end;
@@ -103,7 +109,7 @@ var
      end;
      end;
 
-procedure TForm1.Button5Click(Sender: TObject);
+procedure TMainForm.Button5Click(Sender: TObject);
 var
   x,y : integer;
 begin
@@ -113,37 +119,42 @@ begin
     form3.Show;
 end;
 
-procedure TForm1.Button6Click(Sender: TObject);
+procedure TMainForm.Button6Click(Sender: TObject);
 begin
   opendialog1.Execute;
 
 end;
 
-procedure TForm1.Button7Click(Sender: TObject);
+procedure TMainForm.Button7Click(Sender: TObject);
 begin
  savedialog1.Execute;
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TMainForm.Button1Click(Sender: TObject);
 begin
   Inc(tempi);
   label1.Caption := 'Test enter ' + IntToStr((tempi));
 end;
 
-procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   SAKFreeLib ;
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TMainForm.FormCreate(Sender: TObject);
 var
   x,y : integer;
 begin
   randomize;
      for x := 1 to 4 do
        for y := 1 to 4 do
-      form1.Stock.Cells[x, y] := inttostr(random(1000)) + randommoney ;
+      MainForm.Stock.Cells[x, y] := inttostr(random(1000)) + randommoney ;
     tempi := 0;
+end;
+
+procedure TMainForm.MenuItem1Click(Sender: TObject);
+begin
+
 end;
 
 end.

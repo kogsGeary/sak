@@ -6,8 +6,8 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-   SysUtils,
-   math,
+  SysUtils,
+  math,
   sak,
   Classes,
   fpg_label,
@@ -21,6 +21,7 @@ uses
   fpg_main,
   fpg_memo,
   fpg_dialogs,
+  fpg_Menu,
   fpg_edit,
   fpg_form { you can add units after this };
 
@@ -44,6 +45,12 @@ type
     Button5: TfpgButton;
     ListBox1: TfpgListBox;
     ComboBox1: TfpgComboBox;
+    FMenuBar: TfpgMenuBar;
+     FFileSubMenu: TfpgPopupMenu;
+    FEditSubMenu: TfpgPopupMenu;
+    FEditSelectSubMenu: TfpgPopupMenu;
+    FViewSubMenu: TfpgPopupMenu;
+
     {@VFD_HEAD_END: Assistive}
   public
     procedure btnOpenFileClick(Sender: TObject);
@@ -260,6 +267,7 @@ procedure Tassistive.showform2(Sender: TObject);
   procedure TAssistive.AfterCreate;
   var
   x, y : integer ;
+
   begin
     {%region 'Auto-generated GUI code' -fold}
     {@VFD_BODY_BEGIN: Assistive}
@@ -271,11 +279,72 @@ procedure Tassistive.showform2(Sender: TObject);
     BackgroundColor := clmoneygreen;
     Ondestroy := @FreeLib;
 
+
+
+    FMenuBar := TfpgMenuBar.Create(self);
+  with FMenuBar do
+  begin
+    Name := 'FMenuBar';
+    SetPosition(0, 0, 400, 24);
+    Align := alTop;
+  end;
+
+   FFileSubMenu := TfpgPopupMenu.Create(self);
+  with FFileSubMenu do
+  begin
+    Name := 'FFileSubMenu';
+    SetPosition(264, 60, 120, 20);
+    AddMenuItem('&Open', 'Ctrl-O', nil);
+    AddMenuItem('&Save', 'Ctrl-S', nil);
+    AddMenuItem('S&ave As', 'Ctrl+Shift+S', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Save && Reload', '', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('&Quit', 'Ctrl-Q', nil);
+
+  end;
+
+  FEditSubMenu := TfpgPopupMenu.Create(self);
+  with FEditSubMenu do
+  begin
+    Name := 'FEditSubMenu';
+    SetPosition(264, 80, 120, 20);
+    AddMenuItem('&Cut', 'Ctrl-X', nil);
+    AddMenuItem('C&opy', 'Ctrl-C', nil);
+    AddMenuItem('&Paste', 'Ctrl-V', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('&Spell check', 'F4', nil).Enabled := False;
+  end;
+
+  FEditSelectSubMenu := TfpgPopupMenu.Create(self);
+  with FEditSelectSubMenu do
+  begin
+    Name := 'FEditSelectSubMenu';
+    SetPosition(264, 100, 120, 20);
+    AddMenuItem('Select All', '',nil);
+    AddMenuItem('Select Word', '', nil);
+    AddMenuItem('Select Line', '', nil);
+    FEditSubMenu.AddMenuItem('Selec&t', '', nil).SubMenu := FEditSelectSubMenu;
+  end;
+
+  FViewSubMenu := TfpgPopupMenu.Create(self);
+  with FViewSubMenu do
+  begin
+    Name := 'FViewSubMenu';
+    SetPosition(264, 120, 120, 20);
+    AddMenuItem('Full Screen', '', nil);
+    AddMenuItem('Tool Bar', '', nil).Checked := True;
+    AddMenuItem('Status Bar', '', nil).Checked := True;
+    AddMenuItem('Line Numbers', '', nil);
+  end;
+
+
+
     Load_sak := TfpgButton.Create(self);
     with Load_sak do
     begin
       Name := 'Load_sak';
-      SetPosition(40, 12, 90, 25);
+      SetPosition(40, 32, 90, 25);
       Text := 'Load sak';
       FontDesc := '#Label1';
       Hint := '';
@@ -288,7 +357,7 @@ procedure Tassistive.showform2(Sender: TObject);
     with Unload_sak do
     begin
       Name := 'Unload_sak';
-      SetPosition(40, 44, 90, 25);
+      SetPosition(40, 64, 90, 25);
       Text := 'Unload sak';
       Enabled := False;
       FontDesc := '#Label1';
@@ -361,7 +430,7 @@ procedure Tassistive.showform2(Sender: TObject);
     with Test_text do
     begin
       Name := 'Test_text';
-      SetPosition(168, 12, 188, 161);
+      SetPosition(168, 32, 188, 141);
       FontDesc := '#Edit1';
       Hint := '';
       Lines.Add('Please, write something here...');
@@ -374,7 +443,7 @@ procedure Tassistive.showform2(Sender: TObject);
     with Label1 do
     begin
       Name := 'Label1';
-      SetPosition(396, 12, 300, 30);
+      SetPosition(396, 32, 300, 30);
       FontDesc := '#Label1';
       Hint := '';
       Text := 'Stringgrid : use arrow keys or enter to speak it...';
@@ -384,7 +453,7 @@ procedure Tassistive.showform2(Sender: TObject);
     with test_grid do
     begin
       Name := 'dimension';
-      SetPosition(384, 36, 308, 144);
+      SetPosition(384, 56, 308, 144);
       BackgroundColor := TfpgColor($80000002);
       FontDesc := '#Grid';
       HeaderFontDesc := '#GridHeader';
@@ -404,7 +473,7 @@ procedure Tassistive.showform2(Sender: TObject);
     with test_edit do
     begin
       Name := 'test_edit';
-      SetPosition(396, 200, 288, 24);
+      SetPosition(396, 210, 288, 24);
       ExtraHint := '';
       FontDesc := '#Edit1';
       Hint := '';
@@ -416,7 +485,7 @@ procedure Tassistive.showform2(Sender: TObject);
     with Button3 do
     begin
       Name := 'Button3';
-      SetPosition(424, 240, 96, 23);
+      SetPosition(424, 245, 96, 23);
       Text := 'Other Form2';
       FontDesc := '#Label1';
       Hint := '';
@@ -429,7 +498,7 @@ procedure Tassistive.showform2(Sender: TObject);
     with Button4 do
     begin
       Name := 'Button4';
-      SetPosition(560, 240, 88, 23);
+      SetPosition(560, 245, 88, 23);
       Text := 'Other Form3';
       FontDesc := '#Label1';
       Hint := '';
@@ -485,11 +554,17 @@ procedure Tassistive.showform2(Sender: TObject);
 
     {@VFD_BODY_END: Assistive}
     {%endregion}
-     randomize;
+
+     // Attach sub menus to main menu bar
+  FMenuBar.AddMenuItem('&File', nil).SubMenu := FFileSubMenu;
+  FMenuBar.AddMenuItem('&Edit', nil).SubMenu := FEditSubMenu;
+  FMenuBar.AddMenuItem('&View', nil).SubMenu := FViewSubMenu;
+
+  randomize;
      for x := 0 to 4 do
      for y := 0 to 4 do
      test_grid.Cells[x, y] := inttostr(random(1000)) + randommoney ;
-    f := 0;
+      f := 0;
       end;
 
 procedure Tassistive.btnOpenFileClick(Sender: TObject);

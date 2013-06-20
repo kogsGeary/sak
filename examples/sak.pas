@@ -43,6 +43,7 @@ uses
   StdCtrls,
   ExtCtrls,
   Dialogs,
+  Menus,
      {$else}/// for fpGUI
   fpg_base,
   fpg_main,
@@ -50,6 +51,7 @@ uses
   fpg_button,
   fpg_CheckBox,
   fpg_RadioButton,
+  fpg_Menu,
   fpg_ComboBox,
   fpg_ListBox,
   fpg_memo,
@@ -83,6 +85,7 @@ type
     Shift: TShiftState; X, Y: integer) of object;
   TOnSelectionChange = procedure(Sender: TObject; User: boolean) of object;
   TOnSelectionChangeDialog = procedure(Sender: TObject) of object;
+  TOnMenuChange = procedure(Sender: TObject; item : Tmenuitem; User: boolean) of object;
 
   {$else}//// fpGUI
   TOnKeyChar = procedure(Sender: TObject; Key: TfpgChar; var ifok: boolean) of object;
@@ -111,6 +114,7 @@ type
     OriOnKeyUp: TOnKeyUp;
     OriOnSelectionChange: TOnSelectionChange;
     OriOnSelectionChangeDialog: TOnSelectionChangeDialog;
+    OriOnMenuChange : TOnMenuChange;
       {$else}
     OriOnKeyChar: TOnKeyChar;
     OriOnFocusChange: TOnFocusChange;
@@ -135,6 +139,7 @@ type
     CheckShift: TShiftState ;
     AssistiveData: array of TSAK_Assistive;
      {$IF DEFINED(LCL)}
+    menuitem   : Tmenuitem ;
     CheckKeyChar : Char;
     TimerCount: TTimer;
     TimerRepeat: TTimer;
@@ -152,7 +157,9 @@ type
     procedure CheckRepeatEnter(Sender: TObject);
     procedure CheckRepeatChange(Sender: TObject);
     procedure CheckRepeatKeyPress(Sender: TObject);
-      {$IF DEFINED(LCL)}
+
+    {$IF DEFINED(LCL)}
+    procedure CheckRepeatMenuChange(Sender: TObject);
     procedure CheckRepeatDialog(Sender: TObject);
     procedure CheckRepeatSelectionChange(Sender: TObject);
     procedure CheckKeyUp(Sender: TObject);
@@ -165,7 +172,9 @@ type
       Shift: TShiftState; X, Y: integer);
     procedure SAKSelectionChange(Sender: TObject; User: boolean);
     procedure SAKSelectionChangeDialog(Sender: TObject);
-           {$else}//// fpGUI
+    procedure SAKMenuChange(Sender: TObject; item : Tmenuitem; User: boolean);
+
+    {$else}//// fpGUI
     procedure CheckRepeatKeyChar(Sender: TObject);
     procedure CheckFocusChange(Sender: TObject);
     procedure SAKKeyChar(Sender: TObject; Key: TfpgChar; var ifok: boolean);
@@ -267,8 +276,15 @@ begin
   if (Sender is TOpenDialog) then
     Result := TSaveDialog(Sender).title
   else
+   if (Sender is TMainMenu) then
+    Result := TMainMenu(Sender).name
+  else
+  if (Sender is TMenuItem) then
+    Result := TMenuItem(Sender).caption
+  else
   if (Sender is TOpenDialog) then
     Result := TSaveDialog(Sender).title;
+
 
       {$else}//// fpGUI
   if (Sender is TfpgButton) then
@@ -298,8 +314,19 @@ begin
   if (Sender is TfpgFileDialog) then
     Result := TfpgFileDialog(Sender).WindowTitle
   else
+   if (Sender is TfpgMenuBar) then
+    Result := TfpgMenuBar(Sender).Name
+  else
+  if (Sender is TfpgPopupMenu) then
+    Result := TfpgPopupMenu(Sender).name
+  else
+   if (Sender is TfpgMenuItem) then
+    Result := TfpgMenuItem(Sender).Text
+  else
   if (Sender is TfpgComboBox) then
     Result := TfpgComboBox(Sender).Name ;
+
+
               {$endif}
 end;
 
@@ -360,6 +387,38 @@ begin
 end;
 
   {$IF DEFINED(LCL)}
+procedure TSAK_Init.SAKMenuChange(Sender: TObject; item : Tmenuitem; User: boolean) ;
+begin
+ TimerRepeat.OnTimer := @CheckRepeatMenuChange;
+ TimerRepeat.Enabled:=false;
+ TimerRepeat.Interval:=300;
+ CheckObject := sender;
+ menuitem := item;
+ TimerRepeat.Enabled:=true;
+end;
+
+procedure TSAK_Init.CheckRepeatMenuChange(Sender: TObject);
+var
+  i: integer;
+  texttmp: string;
+  user : boolean ;
+begin
+user := false;
+TimerRepeat.Enabled:=false;
+  for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
+  begin
+   if (CheckObject is TMainMenu) then
+    if (menuitem is Tmenuitem) then
+      with menuitem as Tmenuitem do
+        texttmp := caption + ' selected';
+    espeak_Key(pointer(texttmp));
+
+    if InitSpeech.AssistiveData[i].OriOnMenuChange <> nil then
+         InitSpeech.AssistiveData[i].OriOnMenuChange(CheckObject, menuitem, user);
+  exit;
+  end;
+end;
+
 procedure TSAK_Init.SAKSelectionChange(Sender: TObject; User: boolean);
  begin
  TimerRepeat.OnTimer := @CheckRepeatSelectionChange;
@@ -368,8 +427,6 @@ procedure TSAK_Init.SAKSelectionChange(Sender: TObject; User: boolean);
  CheckObject := sender;
  TimerRepeat.Enabled:=true;
 end;
-
-
 
 procedure TSAK_Init.CheckRepeatSelectionChange(Sender: TObject);
 var
@@ -1068,7 +1125,7 @@ end;
 
 procedure TSAK_Init.InitObject;
 var
-  i, f: integer;
+  i, f, g: integer;
 begin
   mouseclicked := False;
   SetLength(InitSpeech.AssistiveData, 0);
@@ -1109,13 +1166,43 @@ begin
           (Components[i] is TMemo) or (Components[i] is TRadioButton) or
           (Components[i] is TEdit) or (Components[i] is TStringGrid) or
            (Components[i] is TSaveDialog) or (Components[i] is TOpenDialog) or
-          (Components[i] is TListBox) or (Components[i] is TComboBox)
+          (Components[i] is TListBox) or (Components[i] is TComboBox)or
+          (Components[i] is TMainMenu) or (Components[i] is TMenuItem)
          then
         begin
           SetLength(InitSpeech.AssistiveData, Length(InitSpeech.AssistiveData) + 1);
 
           InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1] :=
             TSAK_Assistive.Create();
+
+           if (Components[i] is TMenuItem) then
+          begin
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].Description :=
+              'Menu Item';
+                InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].OriOnClick :=
+              TMenuItem(Components[i]).OnClick;
+
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].TheObject :=
+              TMenuItem(Components[i]);
+            TMenuItem(Components[i]).OnClick := @InitSpeech.SAKClick;
+          end
+           else
+
+          if (Components[i] is TMainMenu) then
+          begin
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].Description :=
+              'Main Menu';
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].TheObject :=
+              TMainMenu(Components[i]);
+             InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].OriOnMenuChange :=
+              TMainMenu(Components[i]).OnChange;
+              TMainMenu(Components[i]).OnChange := @InitSpeech.SAKMenuChange;
+          end
+           else
           if (Components[i] is TButton) then
           begin
 
@@ -1392,7 +1479,8 @@ begin
         if (Components[i] is TfpgButton) or (Components[i] is TfpgMemo) or
           (Components[i] is TfpgEdit) or (Components[i] is TfpgStringGrid) or
           (Components[i] is TfpgCheckBox) or (Components[i] is TfpgRadiobutton) or
-          (Components[i] is TfpgListBox) or (Components[i] is TfpgComboBox)
+          (Components[i] is TfpgListBox) or (Components[i] is TfpgComboBox) or
+           (Components[i] is TfpgPopupMenu) or  (Components[i] is TfpgMenuItem)
           // or (Components[i] is TfpgFileDialog) or (Components[i] is TfpgSaveDialog)
         then
         begin
@@ -1400,6 +1488,31 @@ begin
 
           InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1] :=
             TSAK_Assistive.Create();
+
+           if (Components[i] is TfpgPopupMenu) then
+          begin
+
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].Description :=
+              'Menu';
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].TheObject :=
+              TfpgPopupMenu(Components[i]);
+       InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].OriOnClick :=
+       TfpgPopupMenu(Components[i]).OnShow;
+       TfpgPopupMenu(Components[i]).OnShow := @InitSpeech.SAKClick;
+         with (TfpgPopupMenu(Components[i]) as TfpgPopupMenu) do
+          for g := 0 to ComponentCount - 1 do
+          begin
+            SetLength(InitSpeech.AssistiveData, Length(InitSpeech.AssistiveData) + 1);
+    InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1] :=
+      TSAK_Assistive.Create();
+             InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].TheObject :=
+              TfpgMenuItem(Components[g]);
+       InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].OriOnClick :=
+       TfpgMenuItem(Components[g]).OnClick;
+       TfpgMenuItem(Components[g]).OnClick := @InitSpeech.SAKClick;
+             end;
+             end
+          else
           if (Components[i] is TfpgButton) then
           begin
 
@@ -1665,7 +1778,7 @@ end;
 
 function TSAK_Init.UnLoadLib: integer;
 var
-  i: integer;
+  i, g: integer;
 begin
   if assigned(InitSpeech) then
   begin
@@ -1673,6 +1786,20 @@ begin
     {$IF DEFINED(LCL)}
        for i := 0 to high(InitSpeech.AssistiveData) do
     begin
+     if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
+        (InitSpeech.AssistiveData[i].TheObject is TMainMenu ) then
+      begin
+        TMainMenu(InitSpeech.AssistiveData[i].TheObject).OnChange :=
+          InitSpeech.AssistiveData[i].OriOnMenuChange;
+        end
+      else
+     if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
+        (InitSpeech.AssistiveData[i].TheObject is TMenuItem) then
+      begin
+        TMenuItem(InitSpeech.AssistiveData[i].TheObject).OnClick :=
+          InitSpeech.AssistiveData[i].OriOnClick;
+        end
+      else
        if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
         (InitSpeech.AssistiveData[i].TheObject is TForm) then
       begin
@@ -1806,13 +1933,26 @@ begin
           InitSpeech.AssistiveData[i].OriOnMouseDown;
         TfpgForm(InitSpeech.AssistiveData[i].TheObject).OnDestroy :=
           InitSpeech.AssistiveData[i].OriOnDestroy;
-
-      end
+        end
       else
       if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
         (InitSpeech.AssistiveData[i].TheObject is TfpgButton) then
       begin
         TfpgButton(InitSpeech.AssistiveData[i].TheObject).OnClick :=
+          InitSpeech.AssistiveData[i].OriOnClick;
+      end
+       else
+      if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
+        (InitSpeech.AssistiveData[i].TheObject is TfpgPopupMenu) then
+      begin
+        TfpgPopupMenu(InitSpeech.AssistiveData[i].TheObject).OnShow :=
+          InitSpeech.AssistiveData[i].OriOnClick;
+      end
+        else
+      if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
+        (InitSpeech.AssistiveData[i].TheObject is TfpgMenuItem) then
+      begin
+        TfpgMenuItem(InitSpeech.AssistiveData[i].TheObject).OnClick :=
           InitSpeech.AssistiveData[i].OriOnClick;
       end
       else
