@@ -42,6 +42,7 @@ uses
   Controls,
   StdCtrls,
   ExtCtrls,
+  ComCtrls,
   Dialogs,
   Menus,
      {$else}/// for fpGUI
@@ -54,6 +55,7 @@ uses
   fpg_Menu,
   fpg_ComboBox,
   fpg_ListBox,
+  fpg_TrackBar,
   fpg_memo,
   fpg_edit,
   fpg_form,
@@ -96,6 +98,8 @@ type
   TOnMouseUp = procedure(Sender: TObject; Button: TMouseButton;
     Shift: TShiftState; const Pointm: TPoint) of object;
   TOnFocusChange = procedure(Sender: TObject; col: longint; row: longint) of object;
+   TOnTrackbarChange = procedure(Sender: TObject; position : longint) of object;
+
       {$endif}
 
 type
@@ -118,6 +122,7 @@ type
       {$else}
     OriOnKeyChar: TOnKeyChar;
     OriOnFocusChange: TOnFocusChange;
+    OriOnTrackbarChange: TOnTrackbarChange;
       {$endif}
   public
     Description: ansistring;
@@ -145,7 +150,7 @@ type
     TimerRepeat: TTimer;
       {$else}//// fpGUI
     CheckKeyChar : TfpgChar;
-    CheckCol, CheckRow : longint ;
+    CheckCol, CheckRow, CheckPos : longint ;
     TimerCount: TfpgTimer;
     TimerRepeat: TfpgTimer;
       {$endif}
@@ -185,6 +190,8 @@ type
     procedure SAKMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; const pointm: Tpoint);
     procedure SAKFocusChange(Sender: TObject; col: longint; row: longint);
+    procedure CheckTrackbarChange(Sender: TObject);
+    procedure SAKTrackbarChange(Sender: TObject; pos : longint);
        {$endif}
 
   private
@@ -282,6 +289,9 @@ begin
   if (Sender is TMenuItem) then
     Result := TMenuItem(Sender).caption
   else
+    if (Sender is TTrackBar) then
+    Result := TTrackBar(Sender).Name
+  else
   if (Sender is TOpenDialog) then
     Result := TSaveDialog(Sender).title;
 
@@ -323,9 +333,11 @@ begin
    if (Sender is TfpgMenuItem) then
     Result := TfpgMenuItem(Sender).Text
   else
+    if (Sender is TfpgTrackBar) then
+    Result := TfpgTrackBar(Sender).Name
+  else
   if (Sender is TfpgComboBox) then
     Result := TfpgComboBox(Sender).Name ;
-
 
               {$endif}
 end;
@@ -502,7 +514,12 @@ begin
       with CheckObject as TComboBox do
         texttmp := Text + ' selected';
 
-    if (CheckObject is TCheckBox) then
+    if (CheckObject is TTrackBar) then
+      with CheckObject as TTrackBar do
+        texttmp := name + ' position is, ' + inttostr(position);
+
+
+      if (CheckObject is TCheckBox) then
       with CheckObject as TCheckBox do
 
         if Checked = False then
@@ -551,6 +568,11 @@ begin
    TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
+
+    if (CheckObject is TfpgTrackBar) then
+      with CheckObject as TfpgTrackBar do
+        texttmp := name + ' position is, ' + inttostr(position);
+
     if (CheckObject is TfpgComboBox) then
       with CheckObject as TfpgComboBox do
         texttmp := Text + ' selected';
@@ -586,6 +608,45 @@ begin
     exit;
   end;
 end;
+
+procedure TSAK_Init.SAKTrackbarChange(Sender: TObject; pos : longint);
+begin
+ TimerRepeat.Enabled:=false;
+ TimerRepeat.Interval:=300;
+ TimerRepeat.OnTimer := @CheckTrackbarChange;
+ TimerRepeat.Enabled:=true;
+ CheckObject := sender;
+ CheckPos := pos;
+
+end ;
+
+procedure TSAK_Init.CheckTrackbarChange(Sender: TObject);
+var
+  i: integer;
+  texttmp: string;
+begin
+   TimerRepeat.Enabled:=false;
+  for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
+  begin
+
+    if (CheckObject is TfpgTrackBar) then
+    begin
+      with CheckObject as TfpgTrackBar do  begin
+        texttmp := name + ' position is, ' + inttostr(position);
+
+       espeak_Key(pointer(texttmp));
+
+    if InitSpeech.AssistiveData[i].OriOnTrackBarChange <> nil then
+    InitSpeech.AssistiveData[i].OriOnTrackbarChange(CheckObject, position );
+
+    exit;
+
+    end;
+
+    end;
+  end;
+end;
+
 
 procedure TSAK_Init.SAKFocusChange(Sender: TObject; col: longint; row: longint);
 begin
@@ -752,10 +813,34 @@ begin
               (CheckObject is TfpgComboBox) or (CheckObject is TfpgListBox) then
             else
               espeak_Key('space');
-          57394: espeak_Key('up');
-          57395: espeak_Key('down');
-          57396: espeak_Key('left');
-          57397: espeak_Key('right');
+
+          57394: begin
+            espeak_Key('up');
+            if (CheckObject is TfpgTrackBar) then
+               with CheckObject as TfpgTrackBar do if Position + ScrollStep <= max then
+              Position := Position + ScrollStep ;
+          end;
+          57395: begin
+            espeak_Key('down') ;
+            if (CheckObject is TfpgTrackBar) then
+            with CheckObject as TfpgTrackBar do if Position - ScrollStep >= min then
+              Position := Position - ScrollStep ;
+          end ;
+
+          57396:  begin
+            espeak_Key('left');
+            if (CheckObject is TfpgTrackBar) then
+             with CheckObject as TfpgTrackBar do if Position - ScrollStep >= min then
+              Position := Position - ScrollStep ;
+          end ;
+
+          57397: begin
+            espeak_Key('right');
+            if (CheckObject is TfpgTrackBar) then
+            with CheckObject as TfpgTrackBar do if Position + ScrollStep <= max then
+              Position := Position + ScrollStep ;
+          end ;
+
           57601: espeak_Key('f 1');
           57602: espeak_Key('f 2');
           57603: espeak_Key('f 3');
@@ -767,7 +852,7 @@ begin
           57609: espeak_Key('f 9');
           57610: espeak_Key('f 10');
           57611: espeak_Key('f 11');
-          9: espeak_Key('tab');
+          keyPTab: espeak_Key('tab');
           58112: espeak_Key('shift left');
           58176: espeak_Key('shift right');
           58113: espeak_Key('control right');
@@ -1167,13 +1252,33 @@ begin
           (Components[i] is TEdit) or (Components[i] is TStringGrid) or
            (Components[i] is TSaveDialog) or (Components[i] is TOpenDialog) or
           (Components[i] is TListBox) or (Components[i] is TComboBox)or
-          (Components[i] is TMainMenu) or (Components[i] is TMenuItem)
+          (Components[i] is TMainMenu) or (Components[i] is TMenuItem) or
+          (Components[i] is TTrackBar)
          then
         begin
           SetLength(InitSpeech.AssistiveData, Length(InitSpeech.AssistiveData) + 1);
 
           InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1] :=
             TSAK_Assistive.Create();
+
+           if (Components[i] is TTrackBar) then
+          begin
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].Description :=
+              'Track bar';
+             InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].TheObject :=
+              TTrackBar(Components[i]);
+                InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].OriOnEnter :=
+              TTrackBar(Components[i]).OnEnter;
+              TTrackBar(Components[i]).OnEnter := @InitSpeech.SAKEnter;
+
+                 InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].OriOnChange :=
+              TTrackBar(Components[i]).OnChange;
+              TTrackBar(Components[i]).OnChange := @InitSpeech.SAKChange;
+          end
+           else
 
            if (Components[i] is TMenuItem) then
           begin
@@ -1480,7 +1585,8 @@ begin
           (Components[i] is TfpgEdit) or (Components[i] is TfpgStringGrid) or
           (Components[i] is TfpgCheckBox) or (Components[i] is TfpgRadiobutton) or
           (Components[i] is TfpgListBox) or (Components[i] is TfpgComboBox) or
-           (Components[i] is TfpgPopupMenu) or  (Components[i] is TfpgMenuItem)
+           (Components[i] is TfpgPopupMenu) or  (Components[i] is TfpgMenuItem) or
+           (Components[i] is TfpgTrackBar)
           // or (Components[i] is TfpgFileDialog) or (Components[i] is TfpgSaveDialog)
         then
         begin
@@ -1540,6 +1646,26 @@ begin
               TfpgStringGrid(Components[i]).OnMouseDown;
             TfpgStringGrid(Components[i]).OnFocusChange := @InitSpeech.SAKFocusChange;
             TfpgStringGrid(Components[i]).OnMouseDown := @InitSpeech.SAKMouseDown;
+          end
+          else
+           if (Components[i] is TfpgTrackBar) then
+          begin
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].Description :=
+              'Track bar';
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].TheObject :=
+              TfpgTrackBar(Components[i]);
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].OriOnTrackbarChange :=
+              TfpgTrackBar(Components[i]).OnChange;
+
+            TfpgTrackBar(Components[i]).OnChange := @InitSpeech.SAKTrackBarChange;
+
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
+              1].OriOnEnter :=
+              TfpgTrackBar(Components[i]).OnEnter;
+
+            TfpgTrackBar(Components[i]).OnEnter := @InitSpeech.SAKEnter;
           end
           else
           if (Components[i] is TfpgRadiobutton) then
@@ -1816,6 +1942,17 @@ begin
       end
       else
       if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
+        (InitSpeech.AssistiveData[i].TheObject is TTrackBar) then
+      begin
+        TTrackBar(InitSpeech.AssistiveData[i].TheObject).OnEnter :=
+          InitSpeech.AssistiveData[i].OriOnEnter;
+        TTrackBar(InitSpeech.AssistiveData[i].TheObject).OnMouseDown :=
+          InitSpeech.AssistiveData[i].OriOnMouseDown;
+        TTrackBar(InitSpeech.AssistiveData[i].TheObject).OnChange :=
+          InitSpeech.AssistiveData[i].OriOnChange;
+      end
+      else
+      if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
         (InitSpeech.AssistiveData[i].TheObject is TCheckBox) then
       begin
         TCheckBox(InitSpeech.AssistiveData[i].TheObject).OnEnter :=
@@ -1989,6 +2126,15 @@ begin
         TfpgCheckBox(InitSpeech.AssistiveData[i].TheObject).OnChange :=
           InitSpeech.AssistiveData[i].OriOnChange;
         TfpgCheckBox(InitSpeech.AssistiveData[i].TheObject).OnEnter :=
+          InitSpeech.AssistiveData[i].OriOnEnter;
+      end
+      else
+      if (assigned(InitSpeech.AssistiveData[i].TheObject)) and
+        (InitSpeech.AssistiveData[i].TheObject is TfpgTrackBar) then
+      begin
+        TfpgTrackBar(InitSpeech.AssistiveData[i].TheObject).OnChange :=
+          InitSpeech.AssistiveData[i].OriOnTrackbarChange;
+        TfpgTrackBar(InitSpeech.AssistiveData[i].TheObject).OnEnter :=
           InitSpeech.AssistiveData[i].OriOnEnter;
       end
       else

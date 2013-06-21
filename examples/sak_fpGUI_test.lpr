@@ -6,15 +6,16 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
+  sak,
   SysUtils,
   math,
-  sak,
   Classes,
   fpg_label,
   fpg_grid,
   fpg_button,
   fpg_CheckBox,
   fpg_ComboBox,
+  fpg_TrackBar,
   fpg_ListBox,
   fpg_RadioButton,
   fpg_base,
@@ -29,6 +30,7 @@ type
   Tassistive = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: Assistive}
+
     Load_sak: TfpgButton;
     Unload_sak: TfpgButton;
     CheckBox1: TfpgCheckBox;
@@ -50,6 +52,7 @@ type
     FEditSubMenu: TfpgPopupMenu;
     FEditSelectSubMenu: TfpgPopupMenu;
     FViewSubMenu: TfpgPopupMenu;
+    slider : TfpgTrackBar;
 
     {@VFD_HEAD_END: Assistive}
   public
@@ -272,7 +275,7 @@ procedure Tassistive.showform2(Sender: TObject);
     {%region 'Auto-generated GUI code' -fold}
     {@VFD_BODY_BEGIN: Assistive}
     Name := 'Assistive';
-    SetPosition(58, 165, 709, 280);
+    SetPosition(58, 165, 709, 310);
     WindowTitle := 'sak Assistive Test';
     Hint := '';
     WindowPosition := wpScreenCenter;
@@ -280,6 +283,14 @@ procedure Tassistive.showform2(Sender: TObject);
     Ondestroy := @FreeLib;
 
 
+  slider := TfpgTrackBar.Create(self);
+  with slider do
+  begin
+    Name := 'Slider';
+    SetPosition(200, 275 , 200, 24);
+    Max:=10;
+    Position:=0;
+  end;
 
     FMenuBar := TfpgMenuBar.Create(self);
   with FMenuBar do

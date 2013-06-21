@@ -1,10 +1,10 @@
 object MainForm: TMainForm
-  Left = 209
-  Height = 298
+  Left = 199
+  Height = 303
   Top = 201
   Width = 709
   Caption = 'sak Speecher Assistive Kit.  Use your keyboard to test it.'
-  ClientHeight = 273
+  ClientHeight = 278
   ClientWidth = 709
   Menu = MainMenu1
   OnClose = FormClose
@@ -195,7 +195,7 @@ object MainForm: TMainForm
   object Button6: TButton
     Left = 248
     Height = 25
-    Top = 223
+    Top = 213
     Width = 96
     Caption = 'Open Dialog'
     OnClick = Button6Click
@@ -204,11 +204,19 @@ object MainForm: TMainForm
   object Button7: TButton
     Left = 352
     Height = 25
-    Top = 223
+    Top = 213
     Width = 96
     Caption = 'Save Dialog'
     OnClick = Button7Click
     TabOrder = 14
+  end
+  object TrackBar1: TTrackBar
+    Left = 264
+    Height = 25
+    Top = 246
+    Width = 168
+    Position = 0
+    TabOrder = 15
   end
   object OpenDialog1: TOpenDialog
     left = 336
@@ -223,7 +231,6 @@ object MainForm: TMainForm
     top = 176
     object MenuItem1: TMenuItem
       Caption = 'File'
-      OnClick = MenuItem1Click
       object MenuItem4: TMenuItem
         Caption = 'New'
       end

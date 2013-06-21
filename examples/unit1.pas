@@ -5,7 +5,8 @@ unit Unit1;
 interface
 
 uses
-  sak, Unit2, Unit3, Forms, StdCtrls, Grids, Dialogs, Menus, SysUtils, Classes;
+  sak, Unit2, Unit3, Forms, StdCtrls, Grids, Dialogs, Menus, ComCtrls, SysUtils,
+  Classes;
 
 type
 
@@ -38,8 +39,7 @@ type
     RadioButton1: TRadioButton;
     RadioButton2: TRadioButton;
     Stock: TStringGrid;
-
-
+    TrackBar1: TTrackBar;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
@@ -49,7 +49,6 @@ type
     procedure Button7Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
-    procedure MenuItem1Click(Sender: TObject);
 
   private
     { private declarations }
@@ -152,9 +151,5 @@ begin
     tempi := 0;
 end;
 
-procedure TMainForm.MenuItem1Click(Sender: TObject);
-begin
-
-end;
 
 end.
