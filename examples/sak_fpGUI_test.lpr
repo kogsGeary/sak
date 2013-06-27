@@ -282,7 +282,7 @@ procedure Tassistive.showform2(Sender: TObject);
     {@VFD_BODY_BEGIN: Assistive}
     Name := 'Assistive';
     SetPosition(58, 165, 709, 310);
-    WindowTitle := 'sak Assistive Test';
+    WindowTitle := 'sak is the Speecher Assistive Kit. Use your keyboard to test it...';
     Hint := '';
     WindowPosition := wpScreenCenter;
     BackgroundColor := clmoneygreen;
