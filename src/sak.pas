@@ -119,7 +119,7 @@ type
     OriOnSelectionChange: TOnSelectionChange;
     OriOnSelectionChangeDialog: TOnSelectionChangeDialog;
     OriOnMenuChange : TOnMenuChange;
-      {$else}
+      {$else}  // fpGUI
     OriOnKeyChar: TOnKeyChar;
     OriOnFocusChange: TOnFocusChange;
     OriOnTrackbarChange: TOnTrackbarChange;
@@ -137,7 +137,6 @@ type
     ES_DataDirectory: ansistring;
     isloaded: boolean;
     isworking: boolean;
-    isrepeat: boolean;
     CompCount: integer;
     CheckObject : TObject;
     CheckKey: word;
@@ -419,11 +418,10 @@ user := false;
 TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
-     if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
-   begin
-
-   if (CheckObject is TMainMenu) then
-    if (menuitem is Tmenuitem) then
+     if (CheckObject = InitSpeech.AssistiveData[i].TheObject) and
+     (CheckObject is TMainMenu) and
+    (menuitem is Tmenuitem) then
+    begin
       with menuitem as Tmenuitem do
         texttmp := caption + ' selected';
     espeak_Key(pointer(texttmp));
@@ -434,6 +432,7 @@ TimerRepeat.Enabled:=false;
   end;
 end;
   end;
+
 
 procedure TSAK_Init.SAKSelectionChange(Sender: TObject; User: boolean);
  begin
@@ -454,10 +453,9 @@ user := false;
 TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
-    if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
-   begin
-
-    if (CheckObject is TListBox) then
+    if (CheckObject = InitSpeech.AssistiveData[i].TheObject)and
+    (CheckObject is TListBox) then
+    begin
       with CheckObject as TListBox do
         texttmp := GetSelectedText + ' selected';
     espeak_Key(pointer(texttmp));
@@ -649,10 +647,8 @@ begin
    TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
-   if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
-   begin
-
-    if (CheckObject is TfpgTrackBar) then
+   if (CheckObject = InitSpeech.AssistiveData[i].TheObject) and
+   (CheckObject is TfpgTrackBar) then
     begin
       with CheckObject as TfpgTrackBar do  begin
         texttmp := name + ' position is, ' + inttostr(position);
@@ -668,7 +664,6 @@ begin
     end;
   end;
 end;
-  end;
 
 
 procedure TSAK_Init.SAKFocusChange(Sender: TObject; col: longint; row: longint);
@@ -785,11 +780,10 @@ begin
 
       tempstr := CheckKeyChar;
       tempstr := trim(tempstr);
-      try
+
         if tempstr <> '' then
           espeak_Key(pointer(tempstr));
-      except
-      end;
+
       if InitSpeech.AssistiveData[i].OriOnKeyPress <> nil then
         InitSpeech.AssistiveData[i].OriOnKeyPress(CheckObject,CheckKeyChar);
 
@@ -1063,11 +1057,9 @@ begin
 
       tempstr := CheckKeyChar;
       tempstr := trim(tempstr);
-      try
-        if tempstr <> '' then
+            if tempstr <> '' then
           espeak_Key(pointer(tempstr));
-      except
-      end;
+
       if InitSpeech.AssistiveData[i].OriOnKeyChar <> nil then
       InitSpeech.AssistiveData[i].OriOnKeyChar(CheckObject, CheckKeyChar, ifok);
 
