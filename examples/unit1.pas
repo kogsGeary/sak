@@ -25,6 +25,7 @@ type
     Edit1: TEdit;
     Label1: TLabel;
     Label2: TLabel;
+    Label3: TLabel;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
@@ -49,6 +50,7 @@ type
     procedure Button7Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure TrackBar1Change(Sender: TObject);
 
   private
     { private declarations }
@@ -129,6 +131,8 @@ begin
  savedialog1.Execute;
 end;
 
+
+
 procedure TMainForm.Button1Click(Sender: TObject);
 begin
   Inc(tempi);
@@ -149,6 +153,11 @@ begin
        for y := 1 to 4 do
       MainForm.Stock.Cells[x, y] := inttostr(random(1000)) + randommoney ;
     tempi := 0;
+end;
+
+procedure TMainForm.TrackBar1Change(Sender: TObject);
+begin
+  label3.Caption:=inttostr(TrackBar1.Position);
 end;
 
 

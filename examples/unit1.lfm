@@ -193,7 +193,7 @@ object MainForm: TMainForm
     Text = 'Green'
   end
   object Button6: TButton
-    Left = 248
+    Left = 244
     Height = 25
     Top = 213
     Width = 96
@@ -211,20 +211,33 @@ object MainForm: TMainForm
     TabOrder = 14
   end
   object TrackBar1: TTrackBar
-    Left = 264
+    Left = 280
     Height = 25
-    Top = 246
+    Top = 245
     Width = 168
+    OnChange = TrackBar1Change
     Position = 0
+    ScalePos = trRight
+    ShowSelRange = False
+    TickStyle = tsNone
     TabOrder = 15
+  end
+  object Label3: TLabel
+    Left = 256
+    Height = 18
+    Top = 248
+    Width = 24
+    AutoSize = False
+    Caption = '0'
+    ParentColor = False
   end
   object OpenDialog1: TOpenDialog
     left = 336
     top = 152
   end
   object SaveDialog1: TSaveDialog
-    left = 290
-    top = 163
+    left = 288
+    top = 136
   end
   object MainMenu1: TMainMenu
     left = 104

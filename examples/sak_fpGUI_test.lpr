@@ -36,6 +36,7 @@ type
     CheckBox1: TfpgCheckBox;
     Test_me: TfpgButton;
     Label2: TfpgLabel;
+    Labelpos: TfpgLabel;
     RadioButton1: TfpgRadioButton;
     RadioButton2: TfpgRadioButton;
     Test_text: TfpgMemo;
@@ -61,7 +62,7 @@ type
     procedure btnTestClick(Sender: TObject);
     procedure showform2(Sender: TObject);
     procedure showform3(Sender: TObject);
-
+    procedure changepos(Sender: TObject;pos:longint);
     procedure btnLoadClick(Sender: TObject);
     procedure btnUnLoadClick(Sender: TObject);
     procedure FreeLib(Sender: TObject);
@@ -232,6 +233,11 @@ procedure Tassistive.btnloadClick(Sender: TObject);
 
  end;
 
+procedure Tassistive.changepos(Sender: TObject;pos:longint);
+  begin
+  labelpos.text := inttostr(pos);
+  end;
+
  procedure Tassistive.btnunloadClick(Sender: TObject);
  begin
    UnLoad_sak.Enabled := False;
@@ -290,7 +296,16 @@ procedure Tassistive.showform2(Sender: TObject);
     SetPosition(200, 275 , 200, 24);
     Max:=10;
     Position:=0;
+    OnChange := @ChangePos;
   end;
+
+  Labelpos:= TfpgLabel.Create(self);
+  with Labelpos do
+  begin
+    Name := 'Labelpos';
+    SetPosition(165, 275 , 30, 24);
+    Text:='0';
+    end;
 
     FMenuBar := TfpgMenuBar.Create(self);
   with FMenuBar do

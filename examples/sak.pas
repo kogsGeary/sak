@@ -419,6 +419,9 @@ user := false;
 TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
+     if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
+   begin
+
    if (CheckObject is TMainMenu) then
     if (menuitem is Tmenuitem) then
       with menuitem as Tmenuitem do
@@ -430,6 +433,7 @@ TimerRepeat.Enabled:=false;
   exit;
   end;
 end;
+  end;
 
 procedure TSAK_Init.SAKSelectionChange(Sender: TObject; User: boolean);
  begin
@@ -450,6 +454,9 @@ user := false;
 TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
+    if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
+   begin
+
     if (CheckObject is TListBox) then
       with CheckObject as TListBox do
         texttmp := GetSelectedText + ' selected';
@@ -459,6 +466,8 @@ TimerRepeat.Enabled:=false;
          InitSpeech.AssistiveData[i].OriOnSelectionChange(CheckObject, user);
   exit;
   end;
+end;
+
 end;
 
 procedure TSAK_Init.SAKSelectionChangeDialog(Sender: TObject);
@@ -479,6 +488,9 @@ begin
   x := 0;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
+    if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
+   begin
+
        if (CheckObject is TSaveDialog) then
     begin
       x := 1;
@@ -502,6 +514,8 @@ begin
     end;
 end;
 
+end;
+
 procedure TSAK_Init.CheckRepeatChange(Sender: TObject);
 var
   i: integer;
@@ -510,6 +524,8 @@ begin
   TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
+      if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
+   begin
     if (CheckObject is TComboBox) then
       with CheckObject as TComboBox do
         texttmp := Text + ' selected';
@@ -542,8 +558,10 @@ begin
     if InitSpeech.AssistiveData[i].OriOnChange <> nil then
      InitSpeech.AssistiveData[i].OriOnChange(CheckObject);
     exit;
+   end;
   end;
 end;
+
 
 procedure TSAK_Init.SAKMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: integer);
@@ -568,6 +586,8 @@ begin
    TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
+   if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
+   begin
 
     if (CheckObject is TfpgTrackBar) then
       with CheckObject as TfpgTrackBar do
@@ -608,6 +628,7 @@ begin
     exit;
   end;
 end;
+  end;
 
 procedure TSAK_Init.SAKTrackbarChange(Sender: TObject; pos : longint);
 begin
@@ -628,6 +649,8 @@ begin
    TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
+   if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
+   begin
 
     if (CheckObject is TfpgTrackBar) then
     begin
@@ -636,16 +659,16 @@ begin
 
        espeak_Key(pointer(texttmp));
 
-    if InitSpeech.AssistiveData[i].OriOnTrackBarChange <> nil then
+   if InitSpeech.AssistiveData[i].OriOnTrackBarChange <> nil then
     InitSpeech.AssistiveData[i].OriOnTrackbarChange(CheckObject, position );
 
     exit;
 
     end;
-
     end;
   end;
 end;
+  end;
 
 
 procedure TSAK_Init.SAKFocusChange(Sender: TObject; col: longint; row: longint);
@@ -666,6 +689,7 @@ var
 begin
  TimerRepeat.Enabled:=false;
   for i := 0 to high(InitSpeech.AssistiveData) do
+
     if (CheckObject = InitSpeech.AssistiveData[i].TheObject) and
       (CheckObject is tfpgstringgrid) then
     begin
@@ -909,6 +933,8 @@ begin
   TimerRepeat.Enabled:=false;
   for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
+   if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
+   begin
 
     if ((CheckKey = 38) or (CheckKey = 37) or (CheckKey = 39) or (CheckKey = 13) or (CheckKey = 40)) and
       (CheckObject is tstringgrid) then
@@ -935,6 +961,8 @@ begin
 
     exit;
   end;
+end;
+
 end;
 
 procedure TSAK_Init.SAKKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
@@ -1652,17 +1680,14 @@ begin
           begin
             InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].Description :=
               'Track bar';
-            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
-              1].TheObject :=
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].TheObject :=
               TfpgTrackBar(Components[i]);
-            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
-              1].OriOnTrackbarChange :=
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].OriOnTrackbarChange :=
               TfpgTrackBar(Components[i]).OnChange;
 
             TfpgTrackBar(Components[i]).OnChange := @InitSpeech.SAKTrackBarChange;
 
-            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) -
-              1].OriOnEnter :=
+            InitSpeech.AssistiveData[Length(InitSpeech.AssistiveData) - 1].OriOnEnter :=
               TfpgTrackBar(Components[i]).OnEnter;
 
             TfpgTrackBar(Components[i]).OnEnter := @InitSpeech.SAKEnter;
