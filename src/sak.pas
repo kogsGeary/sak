@@ -72,6 +72,7 @@ type
   end;
 
 type
+
   TProc = procedure of object;
   TOnEnter = procedure(Sender: TObject) of object;
   TOnClick = procedure(Sender: TObject) of object;
@@ -137,7 +138,10 @@ type
     ES_DataDirectory: ansistring;
     isloaded: boolean;
     isworking: boolean;
+     {$IF DEFINED(LCL)}
+     {$else}  // fpGUI
     CompCount: integer;
+    {$endif}
     CheckObject : TObject;
     CheckKey: word;
     CheckShift: TShiftState ;
@@ -145,7 +149,7 @@ type
      {$IF DEFINED(LCL)}
     menuitem   : Tmenuitem ;
     CheckKeyChar : Char;
-    TimerCount: TTimer;
+   // TimerCount: TTimer;
     TimerRepeat: TTimer;
       {$else}//// fpGUI
     CheckKeyChar : TfpgChar;
@@ -157,7 +161,14 @@ type
     procedure SAKChange(Sender: TObject);
     procedure SAKClick(Sender: TObject);
     procedure SAKDestroy(Sender: TObject);
+
+     {$IF DEFINED(LCL)}
+    procedure CheckCount(Sender: TObject;Form: TCustomForm);
+    procedure CheckActive(Sender: TObject; thecontrol : Tcontrol);
+     {$else}//// fpGUI
     procedure CheckCount(Sender: TObject);
+      {$endif}
+
     procedure CheckRepeatEnter(Sender: TObject);
     procedure CheckRepeatChange(Sender: TObject);
     procedure CheckRepeatKeyPress(Sender: TObject);
@@ -346,7 +357,11 @@ var
   i : integer;
 begin
 isworking := false ;
-timercount.Enabled := false;
+{$IF DEFINED(LCL)}
+      {$else}  // fpGUI
+  timercount.Enabled := false;
+     {$endif}
+
  unLoadLib;
    for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
   begin
@@ -357,10 +372,13 @@ timercount.Enabled := false;
        exit;
        end;
   end;
-// CompCount := fpgapplication.ComponentCount + 1 ;
+
   isworking := true ;
-  timercount.Enabled := True;
-   end;
+  {$IF DEFINED(LCL)}
+      {$else}  // fpGUI
+  timercount.Enabled := true;
+     {$endif}
+    end;
 
 procedure TSAK_Init.SAKClick(Sender: TObject);
 var
@@ -442,6 +460,34 @@ procedure TSAK_Init.SAKSelectionChange(Sender: TObject; User: boolean);
  CheckObject := sender;
  TimerRepeat.Enabled:=true;
 end;
+
+procedure TSAK_Init.CheckActive(Sender: TObject;  thecontrol : Tcontrol);
+var
+  i: integer;
+  texttmp: string;
+  user : boolean ;
+begin
+  for i := 0 to (Length(InitSpeech.AssistiveData) - 1) do
+   begin
+     if (thecontrol = InitSpeech.AssistiveData[i].TheObject)and
+     (thecontrol is TStringgrid) then
+     begin
+       with thecontrol as TStringgrid do
+        texttmp := 'Grid ' + name + ' selected';
+      espeak_Key(pointer(texttmp));
+      exit;
+  end;
+
+   if (thecontrol = InitSpeech.AssistiveData[i].TheObject)and
+     (thecontrol is TColorButton) then
+     begin
+       with thecontrol as TColorButton do
+        texttmp := caption + ' selected';
+      espeak_Key(pointer(texttmp));
+      exit;
+  end;
+  end;
+  end;
 
 procedure TSAK_Init.CheckRepeatSelectionChange(Sender: TObject);
 var
@@ -1782,19 +1828,15 @@ end;
 
 ///////////////// loading sak
   {$IF DEFINED(LCL)}
-procedure TSAK_Init.CheckCount(Sender: TObject);
+procedure TSAK_Init.CheckCount(Sender: TObject;Form: TCustomForm);
 begin
-  timercount.Enabled := False;
+
   if isWorking = True then
   begin
-    if application.ComponentCount <> CompCount then
-    begin
       UnLoadLib;
       InitObject;
-      CompCount := application.ComponentCount;
+
     end;
-    timercount.Enabled := True;
-  end;
 end;
 
 {$else}// fpGUI
@@ -1851,8 +1893,10 @@ begin
             {$ENDIF}
          {$IFDEF lcl}
         if Result > -1 then begin
-          TimerCount := Ttimer.Create(TimerCount);
-           TimerRepeat := Ttimer.Create(TimerRepeat);
+        Screen.AddHandlerActiveControlChanged(@CheckActive);
+        Screen.AddHandlerFormAdded(@CheckCount)  ;
+        Screen.AddHandlerRemoveForm(@CheckCount)  ;
+        TimerRepeat := Ttimer.Create(TimerRepeat);
           end;
          {$else}
         if Result > -1 then
@@ -1872,7 +1916,6 @@ begin
   begin
     initspeech.isloaded := True;
          {$IFDEF lcl}
-    CompCount := application.ComponentCount;
          {$else}
     CompCount := fpgapplication.ComponentCount;
          {$ENDIF}
@@ -1880,11 +1923,16 @@ begin
     espeak_Key('sak is working...');
     TimerRepeat.Enabled:=false;
     TimerRepeat.Interval := 600;
-    TimerCount.Enabled := False;
-    TimerCount.Interval := 700;
-    timerCount.OnTimer := @CheckCount;
-    if InitSpeech.isWorking = True then
-      TimerCount.Enabled := True;
+
+           {$IF DEFINED(LCL)}
+      {$else}  // fpGUI
+      TimerCount.Enabled := False;
+         TimerCount.Interval := 700;
+         timerCount.OnTimer := @CheckCount;
+         if InitSpeech.isWorking = True then
+           TimerCount.Enabled := True;
+     {$endif}
+
   end
   else
     Result := -31;
@@ -1896,11 +1944,18 @@ var
 begin
    if assigned(InitSpeech) then
   begin
-    InitSpeech.TimerCount.Enabled:=false;
-     InitSpeech.TimerRepeat.Enabled:=false;
+             {$IF DEFINED(LCL)}
+      {$else}  // fpGUI
+       InitSpeech.TimerCount.Enabled:=false;
+       {$endif}
+   InitSpeech.TimerRepeat.Enabled:=false;
   SAKUnLoadLib;
   sleep(100);
-   InitSpeech.TimerCount.Free;
+    {$IF DEFINED(LCL)}
+      {$else}  // fpGUI
+    InitSpeech.TimerCount.Free;
+       {$endif}
+
    InitSpeech.TimerRepeat.Free;
      for i := 0 to high(InitSpeech.AssistiveData) do
       InitSpeech.AssistiveData[i].Free;
@@ -1925,7 +1980,15 @@ var
 begin
   if assigned(InitSpeech) then
   begin
-    InitSpeech.TimerCount.Enabled := False;
+
+     {$IF DEFINED(LCL)}
+    Screen.RemoveHandlerFormAdded(@CheckCount);
+    Screen.RemoveHandlerRemoveForm(@CheckCount)  ;
+    Screen.RemoveHandlerActiveControlChanged(@CheckActive);
+       {$else}  // fpGUI
+  InitSpeech.TimerCount.Enabled := False;
+       {$endif}
+
     {$IF DEFINED(LCL)}
        for i := 0 to high(InitSpeech.AssistiveData) do
     begin

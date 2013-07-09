@@ -221,7 +221,6 @@ procedure Tassistive.btnloadClick(Sender: TObject);
   begin
     Load_sak.Enabled := False;
     UnLoad_sak.Enabled := True;
-
     SAKLoadlib;
 
    /// You may change the default gender and language.
