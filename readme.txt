@@ -10,8 +10,4 @@ Included in the package:
 Fred van Stappen
 fiens@hotmail.com
 
-Windows users : "MSVCR110.dll is missing" :
-
-If you get such message, copy MSVCR110.dll from /Windows_missing_dll into C:\Windows\System32 
-
 
