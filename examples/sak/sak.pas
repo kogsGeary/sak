@@ -237,6 +237,7 @@ function SAKSetVoice(gender : shortint; language : string) : integer;
 
 ///// Start speaking the text with default voice
 function espeak_key(Text: string): integer;
+function SAKSay(Text: string): integer;
 
 function espeak_cancel: integer;
 
@@ -2276,6 +2277,12 @@ begin
    AProcess.Execute;
 
  end;
+
+function SAKSay(Text: string): integer;
+begin
+ result := espeak_Key(Text);
+end;
+
 
 function espeak_cancel: integer;
 begin
