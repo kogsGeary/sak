@@ -37,7 +37,7 @@ interface
 
 uses
   dynlibs,
-   ctypes,
+  ctypes,
   SysUtils;
 
 {$ifndef SPEAK_LIB_H}
@@ -50,9 +50,9 @@ uses
 
 {$ifdef WIN32}
 
-  { was #define dname def_expr }
-function ESPEAK_API : longint; { return type might be wrong }
-    {$define ESPEAK_API}   // not in original code
+{ was #define dname def_expr }
+function ESPEAK_API: longint; { return type might be wrong }
+    {$define ESPEAK_API}// not in original code
 {$else}
 {$define ESPEAK_API}
 {$endif}
@@ -105,18 +105,18 @@ const
 type
   Pespeak_EVENT_TYPE = ^espeak_EVENT_TYPE;
   espeak_EVENT_TYPE = longint;
-    wchar_t   = cint32;
-    pwchar_t  = ^wchar_t;
+  wchar_t = cint32;
+  pwchar_t = ^wchar_t;
   {$ifdef cpu64}
-    size_t   = cuint64;         { as definied in the C standard}
-    ssize_t  = cint64;          { used by function for returning number of bytes }
-    clock_t  = cuint64;
-    time_t   = cint64;           { used for returning the time  }
+  size_t = cuint64;         { as definied in the C standard}
+  ssize_t = cint64;          { used by function for returning number of bytes }
+  clock_t = cuint64;
+  time_t = cint64;           { used for returning the time  }
 {$else}
-    size_t   = cuint32;         { as definied in the C standard}
-    ssize_t  = cint32;          { used by function for returning number of bytes }
-    clock_t  = culong;
-    time_t   = clong;           { used for returning the time  }
+  size_t = cuint32;         { as definied in the C standard}
+  ssize_t = cint32;          { used by function for returning number of bytes }
+  clock_t = culong;
+  time_t = clong;           { used for returning the time  }
 {$endif}
 
 const
@@ -235,14 +235,14 @@ const
   EE_NOT_FOUND = 2;
 
   espeakINITIALIZE_PHONEME_EVENTS = $0001;
- espeakINITIALIZE_PHONEME_IPA = $0002; 
+  espeakINITIALIZE_PHONEME_IPA = $0002;
   espeakINITIALIZE_DONT_EXIT = $8000;
 (* Const before type ignored *)
 
 type
   Tespeak_Initialize =
-    function(output: espeak_AUDIO_OUTPUT; buflength: longint; path: PChar;
-    options: longint): longint; cdecl;
+    function(output: espeak_AUDIO_OUTPUT; buflength: longint;
+    path: PChar; options: longint): longint; cdecl;
 
   { Must be called before any synthesis functions are called.
      output: the audio data can either be played by eSpeak or passed back by the SynthCallback function.
@@ -289,16 +289,18 @@ type
 (* Const before type ignored *)
 
 type
-    t_espeak_uricallback = function (para1:longint; para2:Pchar; para3:Pchar):longint ;cdecl;
+  t_espeak_uricallback = function(para1: longint; para2: PChar;
+    para3: PChar): longint; cdecl;
 
-type Tespeak_SetUriCallback =
- procedure (UriCallback:t_espeak_uricallback);cdecl;
+type
+  Tespeak_SetUriCallback =
+    procedure(UriCallback: t_espeak_uricallback); cdecl;
 
   { This function may be called before synthesis functions are used, in order to deal with
      <audio> tags.  It specifies a callback function which is called when an <audio> element is
      encountered and allows the calling program to indicate whether the sound file which
      is specified in the <audio> element is available and is to be played.
-  
+
      The callback function is of the form:
 
   int UriCallback(int type, const char *uri, const char *base);
@@ -351,7 +353,7 @@ type
 
      position_type:  Determines whether "position" is a number of characters, words, or sentences.
         Values:
-  
+
      end_position:  If set, this gives a character position at which speaking will stop.  A value
         of zero indicates no end position.
 
@@ -361,7 +363,7 @@ type
            espeakCHARS_8BIT     The 8 bit ISO-8859 character set for the particular language.
            espeakCHARS_AUTO     8 bit or UTF8  (this is the default)
            espeakCHARS_WCHAR    Wide characters (wchar_t)
-  
+
         espeakSSML   Elements within < > are treated as SSML elements, or if not recognised are ignored.
 
         espeakPHONEMES  Text within [[ ]] is treated as phonemes codes (in espeak's Hirshenbaum encoding).
@@ -394,9 +396,9 @@ type
         point at which synthesis starts.  UTF8 string.
 
      For the other parameters, see espeak_Synth()
-  
-     Return: EE_OK: operation achieved 
-             EE_BUFFER_FULL: the command can not be buffered; 
+
+     Return: EE_OK: operation achieved
+             EE_BUFFER_FULL: the command can not be buffered;
                you may try after a while to call the function again.
        EE_INTERNAL_ERROR.
    }
@@ -475,7 +477,7 @@ type
   { Sets the value of the specified parameter.
      relative=0   Sets the absolute value of the parameter.
      relative=1   Sets a relative value of the parameter.
-  
+
      parameter:
         espeakRATE:    speaking speed in word per minute.  Values 80 to 450.
 
@@ -529,30 +531,31 @@ type
 
 (* Const before type ignored *)
 type
-Tespeak_TextToPhonemes =
-  procedure (var text:pointer; buffer:Pchar; size:longint; textmode:longint; phonememode:longint);cdecl;
+  Tespeak_TextToPhonemes =
+    procedure(var Text: pointer; buffer: PChar; size: longint; textmode: longint;
+    phonememode: longint); cdecl;
 
   { Translates text into phonemes.  Call espeak_SetVoiceByName() first, to select a language.
      text: The text to translate, terminated by a zero character.
-  
+
      buffer: Output buffer for the phoneme translation.
-  
+
      size: Size of the output buffer in bytes.
-  
+
      textmode: Type of character codes, one of:
            espeakCHARS_UTF8     UTF8 encoding
            espeakCHARS_8BIT     The 8 bit ISO-8859 character set for the particular language.
            espeakCHARS_AUTO     8 bit or UTF8  (this is the default)
            espeakCHARS_WCHAR    Wide characters (wchar_t)
            espeakCHARS_16BIT    16 bit characters.
-  
+
      phonememode: bits0-3:
         0= just phonemes.
         1= include ties (U+361) for phoneme names of more than one letter.
         2= include zero-width-joiner for phoneme names of more than one letter.
         3= separate phonemes with underscore characters.
-  
-  	 bits 4-7:
+
+     bits 4-7:
         0= eSpeak's ascii phoneme names.
         1= International Phonetic Alphabet (as UTF-8 characters).
    }
@@ -637,14 +640,15 @@ type
      priority byte.
    }
 (* Const before type ignored *)
-   type Tespeak_ListVoices =
- function (var voice_spec:espeak_VOICE): Pespeak_VOICE;cdecl;
+type
+  Tespeak_ListVoices =
+    function(var voice_spec: espeak_VOICE): Pespeak_VOICE; cdecl;
 
-   //  external External_library name 'espeak_ListVoices';
+//  external External_library name 'espeak_ListVoices';
 
   { Reads the voice files from espeak-data/voices and creates an array of espeak_VOICE pointers.
      The list is terminated by a NULL pointer
-  
+
      If voice_spec is NULL then all voices are listed.
      If voice spec is given, then only the voices which are compatible with the voice_spec
      are listed, and they are listed in preference order.
@@ -731,112 +735,134 @@ type
      path_data  returns the path to espeak_data
    }
 
-   { *** ****************************** ***************************************** }
-   { *** the Espeak library functions : ***************************************** }
+{ *** ****************************** ***************************************** }
+{ *** the Espeak library functions : ***************************************** }
 var
-espeak_Initialize : Tespeak_Initialize ;
-espeak_SetSynthCallback : Tespeak_SetSynthCallback ;
-espeak_SetUriCallback : Tespeak_SetUriCallback;
-espeak_Synth : Tespeak_Synth ;
-espeak_Synth_Mark : Tespeak_Synth_Mark ;
-espeak_Key : Tespeak_Key ;
-espeak_Char : Tespeak_Char ;
-espeak_SetParameter : Tespeak_SetParameter;
-espeak_GetParameter : Tespeak_GetParameter ;
-espeak_SetPunctuationList : Tespeak_SetPunctuationList;
-espeak_TextToPhonemes : Tespeak_TextToPhonemes ;
-espeak_SetPhonemeTrace : Tespeak_SetPhonemeTrace ;
-espeak_CompileDictionary : Tespeak_CompileDictionary;
-espeak_SetVoiceByName : Tespeak_SetVoiceByName ;
-espeak_SetVoiceByProperties : Tespeak_SetVoiceByProperties ;
-espeak_GetCurrentVoice : Tespeak_GetCurrentVoice ;
-espeak_IsPlaying : Tespeak_IsPlaying ;
-espeak_Cancel : Tespeak_Cancel ;
-espeak_Synchronize : Tespeak_Synchronize ;
-espeak_Terminate : Tespeak_Terminate ;
-espeak_Info : Tespeak_Info ;
-espeak_ListVoices : Tespeak_ListVoices ;
+  espeak_Initialize: Tespeak_Initialize;
+  espeak_SetSynthCallback: Tespeak_SetSynthCallback;
+  espeak_SetUriCallback: Tespeak_SetUriCallback;
+  espeak_Synth: Tespeak_Synth;
+  espeak_Synth_Mark: Tespeak_Synth_Mark;
+  espeak_Key: Tespeak_Key;
+  espeak_Char: Tespeak_Char;
+  espeak_SetParameter: Tespeak_SetParameter;
+  espeak_GetParameter: Tespeak_GetParameter;
+  espeak_SetPunctuationList: Tespeak_SetPunctuationList;
+  espeak_TextToPhonemes: Tespeak_TextToPhonemes;
+  espeak_SetPhonemeTrace: Tespeak_SetPhonemeTrace;
+  espeak_CompileDictionary: Tespeak_CompileDictionary;
+  espeak_SetVoiceByName: Tespeak_SetVoiceByName;
+  espeak_SetVoiceByProperties: Tespeak_SetVoiceByProperties;
+  espeak_GetCurrentVoice: Tespeak_GetCurrentVoice;
+  espeak_IsPlaying: Tespeak_IsPlaying;
+  espeak_Cancel: Tespeak_Cancel;
+  espeak_Synchronize: Tespeak_Synchronize;
+  espeak_Terminate: Tespeak_Terminate;
+  espeak_Info: Tespeak_Info;
+  espeak_ListVoices: Tespeak_ListVoices;
 
 {$endif}
 
 {Special function for dynamic loading of lib ...}
 
-     var
-       es_Handle:TLibHandle; // this will hold our handle for the lib; it functions nicely as a mutli-lib prevention unit as well...
-       ReferenceCounter : cardinal = 0;  // Reference counter
+var
+  es_Handle: TLibHandle;
+  // this will hold our handle for the lib; it functions nicely as a mutli-lib prevention unit as well...
+  ReferenceCounter: cardinal = 0;  // Reference counter
 
-       function es_IsLoaded : boolean; inline;
-   Function es_load(const libfilename:string) :boolean; // load the lib
+function es_IsLoaded: boolean; inline;
+function es_load(const libfilename: string): boolean; // load the lib
 
-     function es_unload() : boolean; // unload and frees the lib from memory : do not forget to call it before close application.
+function es_unload(): boolean;
+// unload and frees the lib from memory : do not forget to call it before close application.
 
 
 implementation
 
 function es_IsLoaded: boolean;
 begin
-Result := (es_Handle <> dynlibs.NilHandle);
+  Result := (es_Handle <> dynlibs.NilHandle);
 end;
 
-function  es_unload():boolean;
+function es_unload(): boolean;
 begin
   // < Reference counting
   if ReferenceCounter > 0 then
-    dec(ReferenceCounter);
+    Dec(ReferenceCounter);
   if ReferenceCounter > 0 then
     exit;
-    if es_IsLoaded then
+  if es_IsLoaded then
   begin
- espeak_Terminate();
-  DynLibs.UnloadLibrary(es_Handle);
-  es_Handle:=DynLibs.NilHandle;
+    espeak_Terminate();
+    sleep(100);
+    DynLibs.UnloadLibrary(es_Handle);
+    es_Handle := DynLibs.NilHandle;
   end;
 end;
 
-function es_Load (const libfilename:string) :boolean;
+function es_Load(const libfilename: string): boolean;
 
- begin
- Result := False;
- if es_Handle<>0 then
-   begin
-     result:=true; {is it already there ?}
-     Inc(ReferenceCounter);
-end  else begin {go & load the library}
-   if Length(libfilename) = 0 then exit;
-   es_Handle:=DynLibs.LoadLibrary(libfilename); // obtain the handle we want
- 	if es_Handle <> DynLibs.NilHandle then
+begin
+  Result := False;
+  if es_Handle <> 0 then
+  begin
+    Result := True; {is it already there ?}
+    Inc(ReferenceCounter);
+  end
+  else
+  begin {go & load the library}
+    if Length(libfilename) = 0 then
+      exit;
+    es_Handle := DynLibs.LoadLibrary(libfilename); // obtain the handle we want
+    if es_Handle <> DynLibs.NilHandle then
 
-   begin
-    espeak_Initialize := Tespeak_Initialize(GetProcAddress(es_Handle, 'espeak_Initialize'));
-    espeak_SetSynthCallback := Tespeak_SetSynthCallback(GetProcAddress(es_Handle, 'espeak_SetSynthCallback'));
-    espeak_SetUriCallback := Tespeak_SetUriCallback(GetProcAddress(es_Handle, 'espeak_SetUriCallback'));
-    espeak_Synth := Tespeak_Synth(GetProcAddress(es_Handle, 'espeak_Synth'));
-    espeak_Synth_Mark := Tespeak_Synth_Mark(GetProcAddress(es_Handle, 'espeak_Synth_Mark'));
-    espeak_Key := Tespeak_Key(GetProcAddress(es_Handle, 'espeak_Key'));
-    espeak_Char := Tespeak_Char(GetProcAddress(es_Handle, 'espeak_Char'));
-    espeak_SetParameter := Tespeak_SetParameter(GetProcAddress(es_Handle, 'espeak_SetParameter'));
-    espeak_GetParameter := Tespeak_GetParameter(GetProcAddress(es_Handle, 'espeak_GetParameter'));
-    espeak_SetPunctuationList := Tespeak_SetPunctuationList(GetProcAddress(es_Handle, 'espeak_SetPunctuationList'));
-    espeak_TextToPhonemes := Tespeak_TextToPhonemes(GetProcAddress(es_Handle, 'espeak_TextToPhonemes'));
-    espeak_SetPhonemeTrace := Tespeak_SetPhonemeTrace(GetProcAddress(es_Handle, 'espeak_SetPhonemeTrace'));
-    espeak_CompileDictionary := Tespeak_CompileDictionary(GetProcAddress(es_Handle, 'espeak_CompileDictionary'));
-    espeak_SetVoiceByName := Tespeak_SetVoiceByName(GetProcAddress(es_Handle, 'espeak_SetVoiceByName'));
-    espeak_SetVoiceByProperties := Tespeak_SetVoiceByProperties(GetProcAddress(es_Handle, 'espeak_SetVoiceByProperties'));
-    espeak_GetCurrentVoice := Tespeak_GetCurrentVoice(GetProcAddress(es_Handle, 'espeak_GetCurrentVoice'));
-    espeak_IsPlaying := Tespeak_IsPlaying(GetProcAddress(es_Handle, 'espeak_IsPlaying'));
-    espeak_Cancel := Tespeak_Cancel(GetProcAddress(es_Handle, 'espeak_Cancel'));
-    espeak_Synchronize := Tespeak_Synchronize(GetProcAddress(es_Handle, 'espeak_Synchronize'));
-    espeak_Terminate := Tespeak_Terminate(GetProcAddress(es_Handle, 'espeak_Terminate'));
-    espeak_Info := Tespeak_Info(GetProcAddress(es_Handle, 'espeak_Info'));
-  end;
+    begin
+      espeak_Initialize := Tespeak_Initialize(GetProcAddress(es_Handle,
+        'espeak_Initialize'));
+      espeak_SetSynthCallback :=
+        Tespeak_SetSynthCallback(GetProcAddress(es_Handle, 'espeak_SetSynthCallback'));
+      espeak_SetUriCallback := Tespeak_SetUriCallback(
+        GetProcAddress(es_Handle, 'espeak_SetUriCallback'));
+      espeak_Synth := Tespeak_Synth(GetProcAddress(es_Handle, 'espeak_Synth'));
+      espeak_Synth_Mark := Tespeak_Synth_Mark(GetProcAddress(es_Handle,
+        'espeak_Synth_Mark'));
+      espeak_Key := Tespeak_Key(GetProcAddress(es_Handle, 'espeak_Key'));
+      espeak_Char := Tespeak_Char(GetProcAddress(es_Handle, 'espeak_Char'));
+      espeak_SetParameter := Tespeak_SetParameter(GetProcAddress(es_Handle,
+        'espeak_SetParameter'));
+      espeak_GetParameter := Tespeak_GetParameter(GetProcAddress(es_Handle,
+        'espeak_GetParameter'));
+      espeak_SetPunctuationList :=
+        Tespeak_SetPunctuationList(GetProcAddress(es_Handle, 'espeak_SetPunctuationList'));
+      espeak_TextToPhonemes := Tespeak_TextToPhonemes(
+        GetProcAddress(es_Handle, 'espeak_TextToPhonemes'));
+      espeak_SetPhonemeTrace :=
+        Tespeak_SetPhonemeTrace(GetProcAddress(es_Handle, 'espeak_SetPhonemeTrace'));
+      espeak_CompileDictionary :=
+        Tespeak_CompileDictionary(GetProcAddress(es_Handle, 'espeak_CompileDictionary'));
+      espeak_SetVoiceByName := Tespeak_SetVoiceByName(
+        GetProcAddress(es_Handle, 'espeak_SetVoiceByName'));
+      espeak_SetVoiceByProperties :=
+        Tespeak_SetVoiceByProperties(GetProcAddress(es_Handle, 'espeak_SetVoiceByProperties'));
+      espeak_GetCurrentVoice :=
+        Tespeak_GetCurrentVoice(GetProcAddress(es_Handle, 'espeak_GetCurrentVoice'));
+      espeak_IsPlaying := Tespeak_IsPlaying(GetProcAddress(es_Handle, 'espeak_IsPlaying'));
+      espeak_Cancel := Tespeak_Cancel(GetProcAddress(es_Handle, 'espeak_Cancel'));
+      espeak_Synchronize := Tespeak_Synchronize(GetProcAddress(es_Handle,
+        'espeak_Synchronize'));
+      espeak_Terminate := Tespeak_Terminate(GetProcAddress(es_Handle, 'espeak_Terminate'));
+      espeak_Info := Tespeak_Info(GetProcAddress(es_Handle, 'espeak_Info'));
+    end;
     Result := es_IsLoaded;
-    ReferenceCounter:=1;
+    ReferenceCounter := 1;
 
-end;
   end;
-   { was #define dname def_expr }
-  function ESPEAK_API : longint; { return type might be wrong }
-   begin
- // todo   ESPEAK_API:= -1;
-   end;
-  end.
+end;
+
+{ was #define dname def_expr }
+function ESPEAK_API: longint; { return type might be wrong }
+begin
+  // todo   ESPEAK_API:= -1;
+end;
+
+end.
