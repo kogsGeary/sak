@@ -36,6 +36,10 @@ unit sak_dll;
 interface
 
 uses
+  {$IF DEFINED(windows)}
+  dynlibs ,
+  {$endif}
+
   {$IF DEFINED(LCL)}// for LCL
   Forms,
   Grids,
@@ -251,6 +255,10 @@ var
 
   InitSpeech: TSAK_Init;
   mouseclicked: boolean;
+   {$IF DEFINED(windows)}
+ VS_Handle:TLibHandle=dynlibs.NilHandle;
+  {$endif}
+
 
 implementation
 
@@ -1008,7 +1016,6 @@ end;
 procedure TSAK_Init.SAKKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
 var
   i: integer;
-  texttmp: string;
 begin
 
   for i := 0 to high(InitSpeech.AssistiveData) do
@@ -1177,15 +1184,30 @@ begin
        {$endif}
 
    {$ifdef windows}
+       Result := -1;
+
+    if fileexists(ordir + 'msvcr110.dll') then
+    begin
+      VS_Handle := DynLibs.LoadLibrary(ordir + 'msvcr110.dll');
+      if VS_Handle <> DynLibs.NilHandle then  Result := 0;
+         end
+    else
+    if fileexists(ordir + '\sakit_dll\libwin32\msvcr110.dll') then
+    begin
+    VS_Handle := DynLibs.LoadLibrary(ordir + '\sakit_dll\libwin32\msvcr110.dll');
+     if VS_Handle <> DynLibs.NilHandle then  Result := 0;
+       end;
+
+   if Result = 0 then begin
     if fileexists(ordir + 'Portaudio_x86.dll') then
     begin
       Result := 0;
       initspeech.PA_FileName := ordir + 'Portaudio_x86.dll';
     end
     else
-    if fileexists(ordir + '\sakit\lib\Portaudio_x86.dll') then
+    if fileexists(ordir + '\sakit_dll\libwin32\Portaudio_x86.dll') then
     begin
-      initspeech.PA_FileName := ordir + '\sakit\lib\Portaudio_x86.dll';
+      initspeech.PA_FileName := ordir + '\sakit_dll\libwin32\Portaudio_x86.dll';
       Result := 0;
     end;
 
@@ -1198,11 +1220,12 @@ begin
         initspeech.ES_FileName := ordir + 'espeak_x86.dll';
       end
       else
-      if fileexists(ordir + '\sakit\lib\eSpeak_x86.dll') then
+      if fileexists(ordir + '\sakit_dll\libwin32\eSpeak_x86.dll') then
       begin
-        initspeech.ES_FileName := ordir + '\sakit\lib\eSpeak_x86.dll';
+        initspeech.ES_FileName := ordir + '\sakit_dll\libwin32\eSpeak_x86.dll';
         Result := 0;
       end;
+    end;
     end;
          {$else}
          {$IF DEFINED(Linux) and  defined(cpu64)}
@@ -1212,9 +1235,9 @@ begin
       initspeech.PA_FileName := ordir + 'LibPortaudio_x64.so';
     end
     else
-    if fileexists(ordir + '/sakit_dll/lib/LibPortaudio_x64.so') then
+    if fileexists(ordir + '/sakit_dll/liblinux64/LibPortaudio_x64.so') then
     begin
-      initspeech.PA_FileName := ordir + '/sakit_dll/lib/LibPortaudio_x64.so';
+      initspeech.PA_FileName := ordir + '/sakit_dll/liblinux64/LibPortaudio_x64.so';
       Result := 0;
     end;
 
@@ -1227,9 +1250,9 @@ begin
         initspeech.ES_FileName := ordir + 'libespeak_x64.so';
       end
       else
-      if fileexists(ordir + '/sakit_dll/lib/libespeak_x64.so') then
+      if fileexists(ordir + '/sakit_dll/liblinux64/libespeak_x64.so') then
       begin
-        initspeech.ES_FileName := ordir + '/sakit_dll/lib/libespeak_x64.so';
+        initspeech.ES_FileName := ordir + '/sakit_dll/liblinux64/libespeak_x64.so';
         Result := 0;
       end;
     end;
@@ -1241,9 +1264,9 @@ begin
       initspeech.PA_FileName := ordir + 'LibPortaudio_x86.so';
     end
     else
-    if fileexists(ordir + '/sakit_dll/lib/LibPortaudio_x86.so') then
+    if fileexists(ordir + '/sakit_dll/liblinux32/LibPortaudio_x86.so') then
     begin
-      initspeech.PA_FileName := ordir + '/sakit_dll/lib/LibPortaudio_x86.so';
+      initspeech.PA_FileName := ordir + '/sakit_dll/liblinux32/LibPortaudio_x86.so';
       Result := 0;
     end;
     if Result = 0 then
@@ -1255,9 +1278,9 @@ begin
         initspeech.ES_FileName := ordir + 'libespeak_x86.so';
       end
       else
-      if fileexists(ordir + '/sakit_dll/lib/libespeak_x86.so') then
+      if fileexists(ordir + '/sakit_dll/liblinux32/libespeak_x86.so') then
       begin
-        initspeech.ES_FileName := ordir + '/sakit_dll/lib/libespeak_x86.so';
+        initspeech.ES_FileName := ordir + '/sakit_dll/liblinux32/libespeak_x86.so';
         Result := 0;
       end;
     end;
@@ -1276,7 +1299,7 @@ end;
 
 procedure TSAK_Init.InitObject;
 var
-  i, f, g: integer;
+  i, f {$IF DEFINED(LCL)}{$else} ,g  {$endif} : integer;
 begin
   mouseclicked := False;
   SetLength(InitSpeech.AssistiveData, 0);
@@ -1966,6 +1989,10 @@ begin
   ES_Unload();
   sleep(100);
   Pa_Unload();
+   {$IF DEFINED(windows)}
+      DynLibs.UnloadLibrary(VS_Handle);
+     VS_Handle:=DynLibs.NilHandle;
+   {$endif}
   Set8087CW(old8087cw);
 end;
  end;

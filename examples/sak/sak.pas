@@ -37,7 +37,7 @@ unit sak;
 interface
 
 uses
-  {$IF DEFINED(LCL)}// for LCL
+   {$IF DEFINED(LCL)}// for LCL
   Forms,
   Grids,
   Controls,
@@ -65,7 +65,7 @@ uses
   Classes, Math, SysUtils, Process
   {$ifdef windows}
       {$else}
-  ,uos_PortAudio
+  ,uos_PortAudio, baseunix
        {$endif}
   ;
 
@@ -1004,7 +1004,7 @@ end;
 procedure TSAK_Init.SAKKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
 var
   i: integer;
-  texttmp: string;
+
 begin
 
   for i := 0 to high(InitSpeech.AssistiveData) do
@@ -1194,9 +1194,9 @@ begin
         initspeech.ES_FileName := ordir + 'espeak.exe';
       end
       else
-      if fileexists(ordir + '\sakit\lib\espeak.exe') then
+      if fileexists(ordir + '\sakit\libwin32\espeak.exe') then
       begin
-        initspeech.ES_FileName := ordir + '\sakit\lib\espeak.exe';
+        initspeech.ES_FileName := ordir + '\sakit\libwin32\espeak.exe';
         Result := 0;
       end;
             {$else}
@@ -1207,9 +1207,9 @@ begin
       initspeech.PA_FileName := ordir + 'LibPortaudio_x64.so';
     end
     else
-    if fileexists(ordir + '/sakit/lib/LibPortaudio_x64.so') then
+    if fileexists(ordir + '/sakit/liblinux64/LibPortaudio_x64.so') then
     begin
-      initspeech.PA_FileName := ordir + '/sakit/lib/LibPortaudio_x64.so';
+      initspeech.PA_FileName := ordir + '/sakit/liblinux64/LibPortaudio_x64.so';
       Result := 0;
     end;
 
@@ -1220,12 +1220,14 @@ begin
       begin
         Result := 0;
         initspeech.ES_FileName := ordir + 'speak_x64';
+        fpchmod(ordir + 'speak_x64',S_IRWXU) ;
       end
       else
-      if fileexists(ordir + '/sakit/lib/speak_x64') then
+      if fileexists(ordir + '/sakit/liblinux64/speak_x64') then
       begin
-        initspeech.ES_FileName := ordir + '/sakit/lib/speak_x64';
+        initspeech.ES_FileName := ordir + '/sakit/liblinux64/speak_x64';
         Result := 0;
+         fpchmod( ordir + '/sakit/liblinux64/speak_x64',S_IRWXU) ;
       end;
     end;
       {$else}
@@ -1236,11 +1238,12 @@ begin
       initspeech.PA_FileName := ordir + 'LibPortaudio_x86.so';
     end
     else
-    if fileexists(ordir + '/sakit/lib/LibPortaudio_x86.so') then
+    if fileexists(ordir + '/sakit/liblinux32/LibPortaudio_x86.so') then
     begin
-      initspeech.PA_FileName := ordir + '/sakit/lib/LibPortaudio_x86.so';
+      initspeech.PA_FileName := ordir + '/sakit/liblinux32/LibPortaudio_x86.so';
       Result := 0;
     end;
+
     if Result = 0 then
     begin
       Result := -1;
@@ -1248,14 +1251,17 @@ begin
       begin
         Result := 0;
         initspeech.ES_FileName := ordir + 'speak_x86';
+         fpchmod(ordir + 'speak_x86',S_IRWXU) ;
       end
       else
-      if fileexists(ordir + '/sakit/lib/speak_x86') then
+      if fileexists(ordir + '/sakit/liblinux32/speak_x86') then
       begin
-        initspeech.ES_FileName := ordir + '/sakit/lib/speak_x86';
+        initspeech.ES_FileName := ordir + '/sakit/liblinux32/speak_x86';
         Result := 0;
+        fpchmod( ordir + '/sakit/liblinux32/speak_x86',S_IRWXU) ;
       end;
     end;
+
                 {$endif}
                 {$endif}
                 {$endif}
@@ -1271,7 +1277,7 @@ end;
 
 procedure TSAK_Init.InitObject;
 var
-  i, f, g: integer;
+  i, f {$IF DEFINED(LCL)} {$else} ,g {$endif} : integer;
 begin
   mouseclicked := False;
   SetLength(InitSpeech.AssistiveData, 0);
