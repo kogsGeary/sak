@@ -153,8 +153,7 @@ type
      {$IF DEFINED(LCL)}
     menuitem   : Tmenuitem ;
     CheckKeyChar : Char;
-   // TimerCount: TTimer;
-    TimerRepeat: TTimer;
+     TimerRepeat: TTimer;
       {$else}//// fpGUI
     CheckKeyChar : TfpgChar;
     CheckCol, CheckRow, CheckPos : longint ;
@@ -872,10 +871,9 @@ begin
   begin
     if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
     begin
-
-      if (CheckKey = 27) then
+         if (CheckKey = 57611) and ((CheckObject is TfpgMemo) or (CheckObject is TfpgEdit)) then
         espeak_Cancel
-      else
+    else
       begin
         case CheckKey of
 
@@ -1857,7 +1855,6 @@ begin
   begin
       UnLoadLib;
       InitObject;
-
     end;
 end;
 
@@ -1869,7 +1866,7 @@ begin
   begin
   if fpgapplication.ComponentCount <> CompCount then
   begin
-    SAKUnLoadLib;
+    UnLoadLib;
     InitObject;
     CompCount := fpgapplication.ComponentCount;
   end;

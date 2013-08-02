@@ -369,11 +369,10 @@ isworking := false ;
        exit;
        end;
   end;
-
-  isworking := true ;
+   isworking := true ;
   {$IF DEFINED(LCL)}
       {$else}  // fpGUI
-  timercount.Enabled := true;
+    timercount.Enabled := true;
      {$endif}
     end;
 
@@ -860,8 +859,7 @@ begin
   begin
     if (CheckObject = InitSpeech.AssistiveData[i].TheObject) then
     begin
-
-      if (CheckKey = 27) then
+        if (CheckKey = 57611) and ((CheckObject is TfpgMemo) or (CheckObject is TfpgEdit)) then
         espeak_Cancel
       else
       begin
@@ -1848,11 +1846,11 @@ begin
   begin
   if (fpgapplication.ComponentCount <> CompCount) then
   begin
-    SAKUnLoadLib;
+    UnLoadLib;
     InitObject;
     CompCount := fpgapplication.ComponentCount;
-   end;
- timercount.Enabled := True;
+  end;
+  timercount.Enabled := True;
 end;
 
 end;

@@ -133,6 +133,7 @@ procedure Tform2.AfterCreate;
       Lines.Add('Please, write something here...');
       Lines.Add('');
       Lines.Add('Use F12 key to read all.');
+       Lines.Add('Use F11 key to stop reading.');
       TabOrder := 0;
     end;
 
@@ -268,9 +269,8 @@ procedure Tassistive.showform2(Sender: TObject);
  procedure Tassistive.btnTestClick(Sender: TObject);
   begin
     Inc(f);
-// label2.Text := 'Increment = ' + IntToStr(f);
-   label2.Text := 'Form Count= ' + IntToStr(fpgApplication.FormCount);
-  end;
+  label2.Text := 'Increment = ' + IntToStr(f);
+    end;
 
   procedure TAssistive.AfterCreate;
   var
@@ -460,6 +460,7 @@ procedure Tassistive.showform2(Sender: TObject);
       Hint := '';
       Lines.Add('Please, write something here...');
       Lines.Add('Use F12 key to read all ');
+      Lines.Add('Use F11 key to stop reading');
          TabOrder := 5;
     end;
 
@@ -502,7 +503,7 @@ procedure Tassistive.showform2(Sender: TObject);
       FontDesc := '#Edit1';
       Hint := '';
       TabOrder := 9;
-      Text := 'Write something here. Use F12 key to read it...';
+      Text := 'Write something here. Use F12 key to read it, F11 to stop reading...';
     end;
 
     Button3 := TfpgButton.Create(self);
