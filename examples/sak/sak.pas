@@ -1197,7 +1197,7 @@ begin
         initspeech.ES_FileName := ordir + '\sakit\libwin32\espeak.exe';
         Result := 0;
       end;
-            {$else}
+           {$endif}
          {$IF DEFINED(Linux) and  defined(cpu64)}
     if fileexists(ordir + 'LibPortaudio_x64.so') then
     begin
@@ -1228,7 +1228,7 @@ begin
          fpchmod( ordir + '/sakit/liblinux64/speak_x64',S_IRWXU) ;
       end;
     end;
-      {$else}
+     {$endif}
       {$IF DEFINED(Linux) and defined(cpu86) }
     if fileexists(ordir + 'LibPortaudio_x86.so') then
     begin
@@ -1261,8 +1261,41 @@ begin
     end;
 
                 {$endif}
+
+     {$IFDEF Darwin}
+    if fileexists(ordir + 'LibPortaudio-32.dylib') then
+    begin
+      Result := 0;
+      initspeech.PA_FileName := ordir + 'LibPortaudio-32.dylib';
+    end
+    else
+    if fileexists(ordir + '/sakit/libmac32/LibPortaudio-32.dylib') then
+    begin
+      initspeech.PA_FileName := ordir + '/sakit/libmac32/LibPortaudio-32.dylib';
+      Result := 0;
+    end;
+
+    if Result = 0 then
+    begin
+      Result := -1;
+      if fileexists(ordir + 'speak') then
+      begin
+        Result := 0;
+        initspeech.ES_FileName := ordir + 'speak';
+         fpchmod(ordir + 'speak',S_IRWXU) ;
+      end
+      else
+      if fileexists(ordir + '/sakit/libmac32/speak') then
+      begin
+        initspeech.ES_FileName := ordir + '/sakit/libmac32/speak';
+        Result := 0;
+        fpchmod( ordir + '/sakit/libmac32/speak',S_IRWXU) ;
+      end;
+    end;
+
                 {$endif}
-                {$endif}
+
+
   end;
 
   if (Result = 0) or (initspeech.isloaded = True) then
